@@ -130,7 +130,7 @@
 		box-sizing: border-box;
 		text-transform: lowercase;
 		border: none;
-		font-size: calc(0.08 * var(--width));
+		font-size: calc(0.16 * var(--width));
 		border-radius: 2px;
 		background: white;
 		margin: 0;
