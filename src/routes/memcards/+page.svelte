@@ -134,7 +134,7 @@
 		border-radius: 2px;
 		background: white;
 		margin: 0;
-		color: rgba(116, 113, 113, 0.7);
+		color: rgba(215, 211, 211, 0.7);
 	}
 
 	.card.hidden {
