@@ -1,59 +1,123 @@
-<script>
-	import Counter from './Counter.svelte';
-	import welcome from '$lib/images/svelte-welcome.webp';
-	import welcome_fallback from '$lib/images/svelte-welcome.png';
+<script lang="ts">
+	import FlipCard from '$lib/FlipCard.svelte';
+
+	const emojis = ['☕️', '😀', '🔥', '🏠', '🐶', '👁️', '🐍', '💦'];
+	const cardEmojies = [...emojis, ...emojis].sort((a, b) => Math.random() - 0.5);
+
+	interface card {
+		emoji: string;
+		show: boolean;
+		id: number;
+		clicks: number;
+	}
+
+	let cards : card[] = [];
+	let clickedCards : card[] = [];
+	let count = 0;
+
+	const startNew = () => {
+		clickedCards = [];
+		count = 0;
+		cards = cardEmojies
+			.sort((a, b) => Math.random() - 0.5)
+			.map((emoji, i) => {
+				return { emoji, show: false, id: i, clicks: 0 };
+			});
+	};
+	startNew();
+
+	function showCard(card: card): any {
+		if (card.show) return;
+		count++;
+		console.log(card);
+		card.clicks++;
+		card.show = true;
+		clickedCards.push(card);
+		if (clickedCards.length === 2) {
+			if (clickedCards[0].emoji === clickedCards[1].emoji) {
+				clickedCards = [];
+			} else {
+				// pass these references into the closure so
+				// even if the user clicks other cards before the timeout
+				// the current cards are still hidden
+				let card1 = clickedCards[0];
+				let card2 = clickedCards[1];
+				clickedCards = [];
+				console.log('unmatched cards', card1, card2);
+				setTimeout(() => {
+					console.log('hide cards', card1, card2);
+					card1.show = false;
+					card2.show = false;
+					cards = cards;
+				}, 1000);
+			}
+		}
+		cards = cards;
+	}
+
+	$: solved = cards.every((card) => card.show);
 </script>
 
-<svelte:head>
-	<title>Home</title>
-	<meta name="description" content="Svelte demo app" />
-</svelte:head>
+<div class="grid">
+	<div class="row results">
+		<h1>Memory Cards</h1>
+		<p>Flip the cards to find matching pairs. </p>
+		{#if solved}
+			<h2>🎉 You solved it! 🎉</h2>
+		{/if}
+		<div class="hud">
+			<p><button on:click={startNew}>Restart</button></p>
+			<p>Moves: <b>{count}</b> </p>
+		</div>
+	</div>
+</div>
 
-<section>
-	<h1>
-		<span class="welcome">
-			<picture>
-				<source srcset={welcome} type="image/webp" />
-				<img src={welcome_fallback} alt="Welcome" />
-			</picture>
-		</span>
-
-		to your new<br />SvelteKit app
-	</h1>
-
-	<h2>
-		try editing <strong>src/routes/+page.svelte</strong>
-	</h2>
-
-	<Counter />
-</section>
+<div class="grid">
+	{#each Array.from(Array(4).keys()) as row (row)}
+		<div class="row">
+			{#each Array.from(Array(4).keys()) as col (col)}
+				{@const card = cards[row * 4 + col]}
+				<FlipCard flipped={card.show} text={card.emoji} on:clicked={showCard(card)} />
+			{/each}
+		</div>
+	{/each}
+</div>
 
 <style>
-	section {
-		display: flex;
-		flex-direction: column;
-		justify-content: center;
-		align-items: center;
-		flex: 0.6;
-	}
-
-	h1 {
-		width: 100%;
-	}
-
-	.welcome {
-		display: block;
-		position: relative;
-		width: 100%;
-		height: 0;
-		padding: 0 0 calc(100% * 495 / 2048) 0;
-	}
-
-	.welcome img {
-		position: absolute;
+	.grid {
+		--width: min(100vw, 80vh, 780px);
+		max-width: var(--width);
+		align-self: center;
+		justify-self: center;
 		width: 100%;
 		height: 100%;
-		top: 0;
-		display: block;
+		display: flex;
+		flex-direction: column;
+		justify-content: flex-start;
+	}
+
+	.grid .row {
+		display: grid;
+		grid-template-columns: repeat(4, 1fr);
+		grid-gap: 0.3rem;
+		margin: 0 0 0.3rem 0;
+	}
+
+	.grid .results {
+		grid-template-columns: 1fr;
+	}
+
+	.grid.playing .row.current {
+		filter: drop-shadow(3px 3px 10px var(--color-bg-0));
+	}
+
+	.card.hidden {
+		cursor: pointer;
+	}
+
+	.hud {
+		display: flex;
+		justify-content: space-between;
+		font-size: 1.3em;
 	}
 </style>
