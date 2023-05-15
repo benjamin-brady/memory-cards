@@ -3,7 +3,8 @@
 	const dispatch = createEventDispatcher();
 	
 	export let text: string;
-    export let flipped = false;
+  export let flipped = false;
+  export let solved = false;
 	
 	function clicked() {
 		dispatch('clicked', { flipped });
@@ -11,7 +12,7 @@
 </script>
 
 <div class="card">
-  <div class:flipped class="inner">
+  <div class:flipped class:solved class="inner">
 		<div class="front" on:click={clicked} on:keydown={clicked}>
 			?
 		</div>
@@ -29,12 +30,7 @@
     align-items: center;
     justify-content: center;
     text-align: center;
-    box-sizing: border-box;
-    text-transform: lowercase;
-    border: none;
     font-size: calc(0.16 * var(--width));
-    border-radius: 2px;
-    /* background: white; */
     margin: 0;
     color: rgba(215, 211, 211, 0.7);
 }
@@ -64,9 +60,50 @@
     border-radius: 5px;
     cursor: pointer;
 }
+.solved .back {
+  /* border: pink solid 2px; */
+}
 	
 .back {
   transform: rotateY(180deg);
 	flex-direction: column;
+}
+
+.solved .back::after {
+  animation: pulse 1000ms cubic-bezier(0.9, 0.7, 0.5, 0.9);
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 0;
+    display: block;
+    z-index: 10;
+  }
+  50% {
+    transform: scale(1.3);
+    opacity: 1;
+    z-index: 10;
+    display: block;
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 0;
+    content: '';
+    display: none;
+  }
+}
+
+.solved .back::after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  background: rgb(147, 234, 159, 0.5);
+  border-radius: 5%;
+  z-index: -1;
+  opacity: 0;
 }
 </style>

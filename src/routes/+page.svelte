@@ -7,6 +7,7 @@
 	interface card {
 		emoji: string;
 		show: boolean;
+		solved: boolean;
 		id: number;
 		clicks: number;
 	}
@@ -21,7 +22,7 @@
 		cards = cardEmojies
 			.sort((a, b) => Math.random() - 0.5)
 			.map((emoji, i) => {
-				return { emoji, show: false, id: i, clicks: 0 };
+				return { emoji, show: false, id: i, clicks: 0, solved: false };
 			});
 	};
 	startNew();
@@ -34,14 +35,15 @@
 		card.show = true;
 		clickedCards.push(card);
 		if (clickedCards.length === 2) {
+			// references for the timeout closure
+			let card1 = clickedCards[0];
+			let card2 = clickedCards[1];
+
 			if (clickedCards[0].emoji === clickedCards[1].emoji) {
+				card1.solved = true;
+				card2.solved = true; 
 				clickedCards = [];
 			} else {
-				// pass these references into the closure so
-				// even if the user clicks other cards before the timeout
-				// the current cards are still hidden
-				let card1 = clickedCards[0];
-				let card2 = clickedCards[1];
 				clickedCards = [];
 				console.log('unmatched cards', card1, card2);
 				setTimeout(() => {
@@ -77,7 +79,7 @@
 		<div class="row">
 			{#each Array.from(Array(4).keys()) as col (col)}
 				{@const card = cards[row * 4 + col]}
-				<FlipCard flipped={card.show} text={card.emoji} on:clicked={showCard(card)} />
+				<FlipCard solved={card.solved} flipped={card.show} text={card.emoji} on:clicked={showCard(card)} />
 			{/each}
 		</div>
 	{/each}
